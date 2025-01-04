@@ -25,18 +25,34 @@ with app.app_context():
 @app.route('/', methods=['GET', 'POST'])
 def hello_world():
     if request.method=='POST':
+        
+        
         title = request.form['title']
         desc = request.form['desc']
         todo = Todo(title=title, desc=desc)
         db.session.add(todo)
         db.session.commit()
+        print(f"Added todo: {title} - {desc}")
         
-    allTodo = Todo.query.all() 
+    search_query = request.args.get('Search') 
+    print(f"Search query: {search_query}")
+    
+    if search_query:
+        allTodo = Todo.query.filter( (Todo.title.contains(search_query)) | (Todo.desc.contains(search_query)) ).all() 
+        print(f"Search results: {allTodo}")
+    else:
+        allTodo = Todo.query.all()
+        print(f"All todos: {allTodo}")
+  
     return render_template('index.html', allTodo=allTodo)
+
+
+    
 
 
 
 @app.route('/update/<int:sno>', methods=['GET', 'POST'])
+
 def update(sno):
     if request.method=='POST':
         title = request.form['title']
@@ -66,4 +82,4 @@ def about():
 
 
 if __name__=="__main__":
-    app.run(debug=False)
+    app.run(debug=True)
